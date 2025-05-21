@@ -1,0 +1,31 @@
+เทคนิค Image Processing ที่แนะนำสำหรับ Pustule, Papule, Nodule:
+
+Pre-processing (การประมวลผลเบื้องต้น):
+
+Noise Reduction (การลดสัญญาณรบกวน): ภาพผิวหนังอาจมี Noise จากการถ่ายภาพ (เช่น แสงไม่สม่ำเสมอ, สิ่งสกปรก) การใช้ฟิลเตอร์เช่น Gaussian Blur หรือ Median Filter สามารถช่วยให้ภาพดูสะอาดขึ้น แต่ควรระวังอย่าให้เบลอจนสูญเสียรายละเอียดสำคัญ
+Contrast Enhancement (การเพิ่มความคมชัด):
+CLAHE (Contrast Limited Adaptive Histogram Equalization): เหมาะมากสำหรับการเพิ่ม Contrast ในภาพผิวหนัง เพราะมันจะปรับ Contrast ในแต่ละส่วนของภาพ ทำให้ Pustule ที่มีหนองอยู่ข้างใน หรือ Papule/Nodule ที่อาจมีความแตกต่างของสี/Texture ไม่มากนักกับผิวหนังรอบข้าง ดูชัดเจนขึ้น
+Color Space Transformation (การแปลงช่องสี):
+
+RGB to HSV/HLS: Pustule มีหนอง (สีเหลือง/ขาว) และมีฐานแดง การแยก Hue (สี), Saturation (ความอิ่มตัว) และ Value/Luminance (ความสว่าง) จะเป็นประโยชน์มาก
+Hue: ช่วยในการระบุสีแดงของการอักเสบ หรือสีเหลืองของหนอง
+Saturation: Pustule ที่มีหนองมักจะมีความอิ่มตัวของสีที่แตกต่างจาก Papule หรือ Nodule ที่เป็นเนื้อแข็ง
+Value/Luminance: ช่วยในการแยกความนูนหรือความสว่างของตุ่ม
+RGB to Lab: ช่องสี Lab แยก Luminance (L) ออกจาก Chrominance (a*, b*) ซึ่งดีสำหรับการวิเคราะห์สีโดยไม่ได้รับผลกระทบจากความสว่าง ทำให้ Model สามารถเรียนรู้ความแตกต่างของสีที่ละเอียดยิ่งขึ้น
+Feature Enhancement (การเน้นลักษณะเฉพาะ):
+
+Edge Detection (การตรวจจับขอบ):
+Canny Edge Detector: มีประสิทธิภาพสูงในการหาขอบที่ชัดเจน ซึ่งสำคัญในการระบุขอบเขตของ Pustule, Papule, และ Nodule เพื่อให้ Model สามารถวัดขนาดและรูปร่างได้แม่นยำ
+Morphological Operations (การดำเนินการทางสัณฐานวิทยา):
+Opening (Erosion ตามด้วย Dilation): ใช้เพื่อกำจัดจุดเล็กๆ ที่เป็น Noise และทำให้ขอบของ Pustule/Papule/Nodule เรียบขึ้น
+Closing (Dilation ตามด้วย Erosion): ใช้เพื่อเติมเต็มช่องว่างเล็กๆ ภายในตุ่ม หรือเชื่อมต่อส่วนที่ขาดของขอบตุ่มที่ตรวจจับได้
+Shape and Size Analysis (การวิเคราะห์รูปร่างและขนาด):
+หลังจากทำ Segmentation หรือ Edge Detection ได้ขอบเขตของรอยโรคแล้ว สามารถใช้ Convex Hull, Bounding Box หรือ Contour Analysis เพื่อหาคุณลักษณะเชิงรูปร่าง เช่น พื้นที่ (Area), เส้นรอบรูป (Perimeter), อัตราส่วนความกลม (Circularity), อัตราส่วนความยืด (Aspect Ratio)
+ความลึก: Nodule จะมีมิติความลึกที่มากกว่า Papule และ Pustule แม้ว่าภาพ 2D จะจำกัดข้อมูลนี้ แต่การใช้เทคนิคแสงและเงา หรือภาพ 3D (ถ้ามี) สามารถช่วยได้
+Texture Analysis (การวิเคราะห์พื้นผิว):
+GLCM (Gray-Level Co-occurrence Matrix) / LBP (Local Binary Patterns): Pustule อาจมี Texture ที่เรียบกว่าบริเวณที่เป็นหนอง Papule อาจมี Texture ที่เป็นเม็ดเล็กๆ หรือเรียบ Nodule บางชนิดอาจมี Texture ที่แตกต่างกันอย่างชัดเจน การวิเคราะห์ Texture สามารถช่วยแยกความแตกต่างเหล่านี้ได้
+Gabor Filters: เหมาะกับการตรวจจับ Texture ที่มีทิศทางและความถี่เฉพาะ ซึ่งอาจเป็นคุณสมบัติของรอยโรคบางประเภท
+Segmentation (การแบ่งส่วนภาพ):
+
+Thresholding (ในช่องสีที่เหมาะสม): สำหรับ Pustule ที่มีหนองสีชัดเจน การทำ Thresholding บนช่องสี HSV (โดยเฉพาะ Hue และ Saturation) อาจช่วยแยกส่วนที่เป็นหนองออกมาได้
+Clustering (เช่น K-Means): สามารถใช้ K-Means Clustering ใน Color Space (เช่น Lab) เพื่อจัดกลุ่มพิกเซลที่มีสีและ Texture คล้ายกันเข้าด้วยกัน ช่วยในการแยก Pustule, Papule หรือ Nodule ออกจากผิวหนังปกติและจากกันเอง
