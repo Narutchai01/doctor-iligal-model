@@ -12,4 +12,7 @@ dependencies = [
     "ollama>=0.4.8",
     "requests>=2.32.3",
     "python-dotenv>=1.1.0",
+    "ultralytics>=8.3.142",
+    "supabase>=2.15.1",
+    "pymongo>=4.13.0",
 ]
