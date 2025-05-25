@@ -12,6 +12,8 @@ from supabase import create_client, Client
 from pymongo import MongoClient
 from pydantic import BaseModel
 from bson.objectid import ObjectId
+from classify_acne import classify_model
+from datetime import datetime
 
 # MongoDB Configuration
 mongo_client = MongoClient(
@@ -34,6 +36,7 @@ class Item(BaseModel):
     image: str
     user_id: str
     description: str
+    date: datetime = None
 
 
 # Get environment variables with fallback values
@@ -105,7 +108,8 @@ async def webhook(request: Request):
             image_id = message.get('id')
             if image_id:
                 fileName = download_image(image_id, header)
-                result_pred = predict_acne(fileName)
+                # result_pred = predict_acne(fileName)
+                result_pred = classify_model(fileName)
                 acne_prompt = f"Based on this acne analysis result: {result_pred}, please analyze the severity level of the acne (mild, moderate, or severe) and provide health advice and recommendations for treating acne in Thai language. Include skincare tips, lifestyle changes, severity assessment, and when to consult a dermatologist. Please respond in Thai."
 
                 with open(fileName, 'rb') as image_file:
@@ -133,7 +137,8 @@ async def webhook(request: Request):
                 data = {
                     "image": image_url,
                     "user_id": user_id,
-                    "description": text_response.get('message', {}).get('content', "")
+                    "description": text_response.get('message', {}).get('content', ""),
+                    "date": datetime.now()
                 }
 
                 collection.insert_one(data)
